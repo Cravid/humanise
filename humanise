@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage="$(basename "$0") OPTIONS <size> -- Encrypt number of bytes into human readable format
+
+OPTIONS:
+    -h          Show this help message
+
+FUNCTION:
+    size        Size in byte
+"
+usage() {
+    echo "$usage"
+    exit 1
+}
+
+for option in "$@"
+do
+    case $option in
+        -h|--help) usage;;
+        -*|--*|\?) printf "illegal option: %s\n" "$option" >&2; usage;;
+    esac
+done
+
+if [ $# -ne 1 ]; then usage; fi
+
+##
+
+echo $1 | awk \
+    'BEGIN{IGNORECASE = 1}
+    function human(x) {
+    if (x<1000) {return x} else {x/=1000}
+    s="kMGTEPYZ";
+    while (x>=1000 && length(s)>1)
+    {x/=1000; s=substr(s,2)}
+    return x substr(s,1,1)
+    }
+    {sub(/^[0-9]+/, human($1)); print $1"B"}'
+
+
+exit $?
