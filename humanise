@@ -2,10 +2,8 @@
 set -euo pipefail
 
 usage="$(basename "$0") OPTIONS <size> -- Encrypt number of bytes into human readable format
-
 OPTIONS:
     -h          Show this help message
-
 FUNCTION:
     size        Size in byte
 "
@@ -13,6 +11,8 @@ usage() {
     echo "$usage"
     exit 1
 }
+
+read_from_pipe() { read "$@" <&0; }
 
 for option in "$@"
 do
@@ -22,11 +22,18 @@ do
     esac
 done
 
-if [ $# -ne 1 ]; then usage; fi
+INPUT=""
+if [ $# -lt 1 ]; then
+        read INPUT
+elif [ $# -eq 1 ]; then
+        INPUT=$1
+else
+        usage
+fi
 
 ##
 
-echo $1 | awk \
+echo $INPUT | awk \
     'BEGIN{IGNORECASE = 1}
     function human(x) {
     if (x<1000) {return x} else {x/=1000}
